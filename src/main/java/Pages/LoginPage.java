@@ -1,6 +1,7 @@
 package Pages;
 
 import View.LoginFrame2;
+import View.TestJTabbed;
 import com.codeborne.selenide.Condition;
 import org.openqa.selenium.By;
 
@@ -35,14 +36,35 @@ public class LoginPage {
 
 
 
-    public ParcingMethods loginPage(){
-        $(By.xpath("//*[contains(@href,'login')]")).click();
-        $(By.xpath("//div[@class='yOZjD _80tAB']")).shouldNotBe(Condition.visible);
-//        $(By.name("username")).val(getPropByKey("Username"));
-//        $(By.name("password")).val(getPropByKey("Password"));
-        $(By.name("username")).val(String.valueOf(LoginFrame2.userText.getText()));
-        $(By.name("password")).val(String.valueOf(LoginFrame2.passwordText.getPassword()));
-        $(By.xpath("//button/div")).click();
+    public ParcingMethods loginPage(String option){
+        switch(option){
+            case ("geo"):
+                $(By.xpath("//*[contains(@href,'login')]")).click();
+                $(By.xpath("//div[@class='yOZjD _80tAB']")).shouldNotBe(Condition.visible);
+                $(By.name("username")).val(String.valueOf(TestJTabbed.userTextGeo.getText()));
+                $(By.name("password")).val(String.valueOf(TestJTabbed.passwordTextGeo.getPassword()));
+                $(By.xpath("//button/div")).click();
+                break;
+            case  ("hashtag"):
+                $(By.xpath("//*[contains(@href,'login')]")).click();
+                $(By.xpath("//div[@class='yOZjD _80tAB']")).shouldNotBe(Condition.visible);
+                $(By.name("username")).val(String.valueOf(TestJTabbed.userTextHashTag.getText()));
+                $(By.name("password")).val(String.valueOf(TestJTabbed.passwordTexthashTag.getPassword()));
+                $(By.xpath("//button/div")).click();
+            break;
+            case ("account"):
+                $(By.xpath("//*[contains(@href,'login')]")).click();
+                $(By.xpath("//div[@class='yOZjD _80tAB']")).shouldNotBe(Condition.visible);
+                $(By.name("username")).val(String.valueOf(TestJTabbed.userTextAccount.getText()));
+                $(By.name("password")).val(String.valueOf(TestJTabbed.passwordTextAccount.getPassword()));
+                $(By.xpath("//button/div")).click();
+            break;
+        }
+//        $(By.xpath("//*[contains(@href,'login')]")).click();
+//        $(By.xpath("//div[@class='yOZjD _80tAB']")).shouldNotBe(Condition.visible);
+//        $(By.name("username")).val(String.valueOf(LoginFrame2.userText.getText()));
+//        $(By.name("password")).val(String.valueOf(LoginFrame2.passwordText.getPassword()));
+//        $(By.xpath("//button/div")).click();
         return page(ParcingMethods.class);
     }
 

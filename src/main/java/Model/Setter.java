@@ -41,7 +41,11 @@ public class Setter {
                 "#Українськийбренд",
                 "заробітку",
                 "онлайн",
-                "shop"
+                "shop",
+                "Shoes",
+                "boutique",
+                "отправка",
+                "лучшее качество"
         };
         return page(ParcingMethods.class);
     }
