@@ -2,8 +2,6 @@ package Test;
 
 import Pages.ParcingMethods;
 import Pages.LoginPage;
-
-import View.LoginFrame2;
 import View.TestJTabbed;
 import com.codeborne.selenide.Configuration;
 import org.testng.annotations.BeforeTest;
@@ -19,6 +17,7 @@ public class ParcingFollowers {
     public void setup(){
         Configuration.startMaximized = true;
         Configuration.timeout = 10000;
+
         parcingMethods = new ParcingMethods();
     }
 
@@ -28,22 +27,22 @@ public class ParcingFollowers {
 
 
         LoginPage loginPage = open("https://www.instagram.com/?hl=ru", LoginPage.class);
-        loginPage.loginPage(option);
+        loginPage.loginPage();
         sleep(5000);
         ParcingMethods parcingMethods = new ParcingMethods();
         parcingMethods.closePopup();
 
         switch(option){
             case ("geo"):
-                open(TestJTabbed.linkTextGeo.getText());
+                open(TestJTabbed.linkText.getText());
                 parcingMethods.parceGeo();
                 break;
             case  ("hashtag"):
-                open(TestJTabbed.linkTextHashTag.getText());
+                open(TestJTabbed.linkText.getText());
                 parcingMethods.parceHashTag();
                 break;
             case ("account"):
-                open(TestJTabbed.linkTextAccount.getText());
+                open(TestJTabbed.linkText.getText());
                 parcingMethods.parceLogin();
                 break;
         }
@@ -52,7 +51,7 @@ public class ParcingFollowers {
 
 }
 //geo
-//"https://www.instagram.com/explore/locations/213664707/lviv-ukraine/"
+//"https://www.instagram.com/explore/locations/749889026/dnipro/"
 
 //hash
 //"https://www.instagram.com/explore/tags/dnepr/"

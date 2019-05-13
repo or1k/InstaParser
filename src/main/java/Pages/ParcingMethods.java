@@ -2,7 +2,9 @@ package Pages;
 
 import Model.CsvFileWriter;
 import Model.Setter;
+import View.TestJTabbed;
 import com.codeborne.selenide.SelenideElement;
+import com.codeborne.selenide.WebDriverProvider;
 import com.codeborne.selenide.WebDriverRunner;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -25,12 +27,16 @@ public class ParcingMethods {
     private SelenideElement nickButton = $(By.xpath("//a[@class='FPmhX notranslate nJAzx']"));
     private SelenideElement Description = $(By.xpath("//div[@class='-vDIg']/span"));
     private SelenideElement Followers = $(By.xpath("//*[@class='-nal3 'and contains(@href, 'followers')]/span"));
-    private SelenideElement nextAccount = $(By.xpath("//a[text()='Next']"));
-    public ArrayList<String> list = new ArrayList<String>();
+    private SelenideElement nextAccount = $(By.xpath("//a[@class='HBoOv coreSpriteRightPaginationArrow']"));
+    //public ArrayList<String> list = new ArrayList<String>();
     private SelenideElement FirstComment = $(By.xpath("//ul[@class='XQXOT']//li[1]"));
-    private Map reportData = new HashMap();
-    private Setter setter = new Setter();
+    //private Map reportData = new HashMap();
+    private HashSet list = new HashSet();
+    private SelenideElement timeInPost = $(By.xpath("//div[@class='k_Q0X NnvRN']//time"));
+   // private Setter setter = new Setter();
     private CsvFileWriter csvFileWriter;
+    private int order = Integer.parseInt(TestJTabbed.order.getText());
+    private String startTime = "";
 
 
     public void closePopup(){
@@ -101,15 +107,25 @@ public class ParcingMethods {
     }
 
     private boolean checkFollowersAndFollowing(){
-        int followersNumber = Integer.parseInt(Followers.getAttribute("title").replaceAll("[^0-9]", ""));
-       // int followingNumber = Integer.parseInt(Following.getText().replaceAll("[^0-9]", ""));
-        if(followersNumber < 20){
-            System.out.println("Аккаунт не подходит по условию: Подписчик/Подписки");
-            return false;
+        if(Followers.isDisplayed()) {
+            try {
+                int followersNumber = Integer.parseInt(Followers.getAttribute("title").replaceAll("[^0-9]", ""));
+                // int followingNumber = Integer.parseInt(Following.getText().replaceAll("[^0-9]", ""));
+                if (followersNumber < Integer.parseInt(TestJTabbed.countSubscribers.getText())) {
+                    System.out.println("Аккаунт не подходит по условию: Подписчик/Подписки");
+                    return false;
 
+                } else {
+                    System.out.println("Аккаунт подходит по условию: Подписчик/Подписки");
+                    return true;
+                }
+            }catch (NumberFormatException e){
+                System.out.println("followers not a number");
+                return false;
+            }
         }else{
-            System.out.println("Аккаунт подходит по условию: Подписчик/Подписки");
-            return true;
+            System.out.println("Не отображается кол-ва подписоты.");
+            return false;
         }
     }
 
@@ -119,7 +135,8 @@ public class ParcingMethods {
             FirstPicture.click();
             sleep(500);
             //switchTo().window(2);
-            String dateFromInst = $(By.xpath("//div[@class='k_Q0X NnvRN']//time")).getAttribute("datetime").substring(0, 10).replaceAll("-", ".");
+        if(timeInPost.isDisplayed()) {
+            String dateFromInst = timeInPost.getAttribute("datetime").substring(0, 10).replaceAll("-", ".");
             try {
                 // создаем формат, в котором будем парсить дату
                 Date dateNow = new Date();
@@ -138,6 +155,9 @@ public class ParcingMethods {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }else{
+            System.out.println("Неполучилось проверять дату поста время.");
+        }
         return 0;
     }
 
@@ -150,24 +170,31 @@ public class ParcingMethods {
                     System.out.println("Рекламный пост. Скипаем.");
                     System.out.println("Есть совпадение по слову " + setter.keyWords[i]);
                     return true;
+                }else{
+                    System.out.println("Пост не рекламный. кек");
+                    return false;
                 }
             }else{
-                System.out.println("Аккаунт чистый. кек");
+                System.out.println("Пост отсутствует.");
                 return false;
             }
         }
-        System.out.println("Пост не рекламный. кек");
         return false;
     }
 
     public ParcingMethods parceGeo(){
+
         System.out.println("GEO Start");
         csvFileWriter = new CsvFileWriter();
         FirstPicture.click();
-        for (int i = 0; i < 100; i++) {
+        startTime = getCurrentTime();
+        int numberFollowerInList = 1;
+        System.out.println(startTime);
+        for (int i = 0; i < order;) {
             try {
-                System.out.println("--------------------------Проверка пользователя номер "+ i +"--------------------------");
-                sleep(1000);
+                System.out.println("--------------------------Проверка пользователя номер "+ numberFollowerInList +"--------------------------");
+                System.out.println("ССылка на пользователя " + WebDriverRunner.getWebDriver().getCurrentUrl());
+                sleep(500);
 
                 /**
                  * Проверка на рекламный пост
@@ -175,13 +202,24 @@ public class ParcingMethods {
                 System.out.println("Проверка на рекламный пост:");
                 if(checkKeyWordsFirstPost()){
                     nextAccount.click();
+                    numberFollowerInList++;
                     continue;
                 }
 
 
-                Actions newTab = new Actions(WebDriverRunner.getWebDriver());
-                newTab.keyDown(Keys.CONTROL).click(nickButton).keyUp(Keys.CONTROL).build().perform();
-                System.out.println("ССылка на пользователя " + WebDriverRunner.getWebDriver().getCurrentUrl());
+                /**
+                 * Пытаемся перейти в аккаунт
+                 */
+                if(nickButton.isDisplayed()) {
+                    Actions newTab = new Actions(WebDriverRunner.getWebDriver());
+                    newTab.keyDown(Keys.CONTROL).click(nickButton).keyUp(Keys.CONTROL).build().perform();
+                }else{
+                    nextAccount.click();
+                    sleep(1000);
+                    numberFollowerInList++;
+                    continue;
+                }
+
                 sleep(1000);
                 switchTo().window(1);
 
@@ -189,35 +227,40 @@ public class ParcingMethods {
                 /**
                  * Закрытый акк или нет
                  */
-                if(checkStatusAccount()){
-                    WebDriverRunner.getWebDriver().close();
-                    switchTo().window(0);
-                    nextAccount.click();
-                    sleep(1000);
-                    continue;
-                }
+
+                    if (checkStatusAccount()) {
+                        WebDriverRunner.getWebDriver().close();
+                        switchTo().window(0);
+                        nextAccount.click();
+                        sleep(1000);
+                        numberFollowerInList++;
+                        continue;
+                    }
 
                 /**
                  * Проверка на Стоп-слова
                  */
-                System.out.println("Проверка на стоп-слова:");
-                if(checkKeyWordsInDescription()){
-                    WebDriverRunner.getWebDriver().close();
-                    switchTo().window(0);
-                    nextAccount.click();
-                    sleep(1000);
-                    continue;
-                }
+                    System.out.println("Проверка на стоп-слова:");
+                    if (checkKeyWordsInDescription()) {
+                        WebDriverRunner.getWebDriver().close();
+                        switchTo().window(0);
+                        nextAccount.click();
+                        sleep(1000);
+                        numberFollowerInList++;
+                        continue;
+                    }
+
 
                 /**
                  * Проверка подписчиков и подписок
                  */
-                if (!(checkFollowersAndFollowing())) {
-                    WebDriverRunner.getWebDriver().close();
-                    switchTo().window(0);
-                    nextAccount.click();
-                    sleep(1000);
-                    continue;
+                    if (!(checkFollowersAndFollowing())) {
+                        WebDriverRunner.getWebDriver().close();
+                        switchTo().window(0);
+                        nextAccount.click();
+                        sleep(1000);
+                        numberFollowerInList++;
+                        continue;
                 }
 
 
@@ -244,18 +287,26 @@ public class ParcingMethods {
                 /**
                  * Добавляемя аккаунт в список
                  */
-                reportData.put("Link/ID", WebDriverRunner.getWebDriver().getCurrentUrl());
-                list.add(setter.lineToCSV(reportData));
+                list.add(WebDriverRunner.getWebDriver().getCurrentUrl());
+
+                /**
+                 * Приравниваем цикл к количеству записей в файле.
+                 */
+                if(i != list.size()){
+                    i=list.size();
+                }
                 WebDriverRunner.getWebDriver().close();
                 switchTo().window(0);
                 nextAccount.click();
                 sleep(1000);
             }catch (Exception ex){
-                csvFileWriter.writeCsvFile("Instagram_peoples_"+getCurrentTime()+".csv", list, "people");
+                csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
             }
+
+            numberFollowerInList++;
         }
-        csvFileWriter.writeCsvFile("Instagram_peoples_"+getCurrentTime()+".csv", list, "people");
+        csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
         return this;
     }
 
@@ -266,59 +317,99 @@ public class ParcingMethods {
         System.out.println("HashTag Start");
         csvFileWriter = new CsvFileWriter();
         FirstPicture.click();
-        for (int i = 0; i < 100; i++) {
+        startTime = getCurrentTime();
+        int numberFollowerInList = 1;
+        for (int i = 0; i < order;) {
             try {
-                System.out.println("--------------------------Проверка пользователя номер "+ i +"--------------------------");
-                sleep(1000);
+                System.out.println("--------------------------Проверка пользователя номер "+ numberFollowerInList +"--------------------------");
+                System.out.println("ССылка на пользователя " + WebDriverRunner.getWebDriver().getCurrentUrl());
+                sleep(500);
 
                 /**
                  * Проверка на рекламный пост
                  */
-                System.out.println("************Проверка на рекламный пост************");
-                if(checkKeyWordsFirstPost()){
+                try {
+                    System.out.println("************Проверка на рекламный пост************");
+                    if (checkKeyWordsFirstPost()) {
+                        nextAccount.click();
+                        numberFollowerInList++;
+                        continue;
+                    }
+                }catch (Exception ex){
                     nextAccount.click();
+                    numberFollowerInList++;
                     continue;
                 }
 
 
                 Actions newTab = new Actions(WebDriverRunner.getWebDriver());
                 newTab.keyDown(Keys.CONTROL).click(nickButton).keyUp(Keys.CONTROL).build().perform();
-                System.out.println("ССылка на пользователя " + WebDriverRunner.getWebDriver().getCurrentUrl());
-                sleep(1000);
+
+                sleep(500);
                 switchTo().window(1);
 
 
                 /**
                  * Закрытый акк или нет
                  */
-                if(checkStatusAccount()){
+                try {
+                    if (checkStatusAccount()) {
+                        WebDriverRunner.getWebDriver().close();
+                        switchTo().window(0);
+                        nextAccount.click();
+                        sleep(1000);
+                        numberFollowerInList++;
+                        continue;
+                    }
+                }catch (Exception ex){
                     WebDriverRunner.getWebDriver().close();
                     switchTo().window(0);
                     nextAccount.click();
                     sleep(1000);
+                    numberFollowerInList++;
                     continue;
                 }
 
                 /**
                  * Проверка на Стоп-слова
                  */
-                System.out.println("Проверка на стоп-слова:");
-                if(checkKeyWordsInDescription()){
+                try {
+                    System.out.println("Проверка на стоп-слова:");
+                    if (checkKeyWordsInDescription()) {
+                        WebDriverRunner.getWebDriver().close();
+                        switchTo().window(0);
+                        nextAccount.click();
+                        sleep(1000);
+                        numberFollowerInList++;
+                        continue;
+                    }
+                }catch (Exception ex){
                     WebDriverRunner.getWebDriver().close();
                     switchTo().window(0);
                     nextAccount.click();
                     sleep(1000);
+                    numberFollowerInList++;
                     continue;
                 }
 
                 /**
                  * Проверка подписчиков и подписок
                  */
-                if (!(checkFollowersAndFollowing())) {
+                try {
+                    if (!(checkFollowersAndFollowing())) {
+                        WebDriverRunner.getWebDriver().close();
+                        switchTo().window(0);
+                        nextAccount.click();
+                        sleep(1000);
+                        numberFollowerInList++;
+                        continue;
+                    }
+                }catch (Exception ex){
                     WebDriverRunner.getWebDriver().close();
                     switchTo().window(0);
                     nextAccount.click();
                     sleep(1000);
+                    numberFollowerInList++;
                     continue;
                 }
 
@@ -346,36 +437,40 @@ public class ParcingMethods {
                 /**
                  * Добавляемя аккаунт в список
                  */
-                reportData.put("Link/ID", WebDriverRunner.getWebDriver().getCurrentUrl());
-                list.add(setter.lineToCSV(reportData));
+                list.add(WebDriverRunner.getWebDriver().getCurrentUrl());
+                /**
+                 * Приравниваем цикл к количеству записей в файле.
+                 */
+                if(i != list.size()){
+                    i=list.size();
+                }
+
                 WebDriverRunner.getWebDriver().close();
                 switchTo().window(0);
                 nextAccount.click();
                 sleep(1000);
+                i++;
             }catch (Exception ex){
-                csvFileWriter.writeCsvFile("Instagram_peoples_"+getCurrentTime()+".csv", list, "people");
+                csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
             }
+            numberFollowerInList++;
         }
-        csvFileWriter.writeCsvFile("Instagram_peoples_"+getCurrentTime()+".csv", list, "people");
+        csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
         return this;
     }
+
+
     public void parceLogin(){
         System.out.println("By Account Start");
         csvFileWriter = new CsvFileWriter();
         Followers.click();
         int numberFollowerInList = 1;
-        int countPeoples = 0;
+        System.out.println(order);
+        startTime = getCurrentTime();
 
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < order;) {
             try {
-                /**
-                 * Проверяем на количество записаных.
-                 */
-                if(countPeoples == 20){
-                    break;
-                }
-
                 String LocatorName = "//li[" + numberFollowerInList + "]//a[@class='FPmhX notranslate _0imsa ']";
                 SelenideElement loginButton = $(By.xpath(LocatorName));
                 executeJavaScript("arguments[0].scrollIntoView(true);", loginButton);
@@ -419,9 +514,6 @@ public class ParcingMethods {
                  */
                 System.out.println("Проверка на стоп-слова:");
                 if(checkKeyWordsInDescription()){
-//                    WebDriverRunner.getWebDriver().close();
-//                    switchTo().window(0);
-//                    nextAccount.click();
                     WebDriverRunner.getWebDriver().navigate().back();
                     sleep(1000);
                     numberFollowerInList++;
@@ -431,10 +523,14 @@ public class ParcingMethods {
                 /**
                  * Проверка подписчиков и подписок
                  */
-                if (!(checkFollowersAndFollowing())) {
-//                    WebDriverRunner.getWebDriver().close();
-//                    switchTo().window(0);
-//                    nextAccount.click();
+                try {
+                    if (!(checkFollowersAndFollowing())) {
+                        WebDriverRunner.getWebDriver().navigate().back();
+                        sleep(1000);
+                        numberFollowerInList++;
+                        continue;
+                    }
+                }catch (Exception ex){
                     WebDriverRunner.getWebDriver().navigate().back();
                     sleep(1000);
                     numberFollowerInList++;
@@ -465,21 +561,25 @@ public class ParcingMethods {
                     continue;
                 }
 
+                list.add(WebDriverRunner.getWebDriver().getCurrentUrl());
+
                 /**
-                 * Добавляемя аккаунт в список
+                 * Приравниваем цикл к количеству записей в файле.
                  */
-                reportData.put("Link/ID", WebDriverRunner.getWebDriver().getCurrentUrl());
-                list.add(setter.lineToCSV(reportData));
+                if(i != list.size()){
+                    i=list.size();
+                }
+
                 WebDriverRunner.getWebDriver().navigate().back();
                 sleep(1000);
-                countPeoples ++;
+                i++;
             }catch (Exception ex){
-                csvFileWriter.writeCsvFile("Instagram_peoples_"+getCurrentTime()+".csv", list, "people");
+                csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
             }
             numberFollowerInList++;
         }
-        csvFileWriter.writeCsvFile("Instagram_peoples_"+getCurrentTime()+".csv", list, "people");
+        csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
     }
 
 

@@ -2,7 +2,7 @@ package Model;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
+import java.util.HashSet;
 
 public class CsvFileWriter {
     //Delimiter used in CSV file
@@ -13,7 +13,7 @@ public class CsvFileWriter {
     private static final String FILE_HEADER = "Link/ID";
 
 
-    public void writeCsvFile(String fileName, List<String> data, String nameFlow) {
+    public void writeCsvFile(String fileName, HashSet data, String nameFlow) {
 
         FileWriter fileWriter = null;
 
@@ -22,15 +22,15 @@ public class CsvFileWriter {
 
             if(nameFlow.contains("people")) {
                 //Write the CSV file header
-                fileWriter.append(FILE_HEADER.toString());
+                fileWriter.append(FILE_HEADER);
             }
 
             //Add a new line separator after the header
             fileWriter.append(NEW_LINE_SEPARATOR);
 
             //Write a new student object list to the CSV file
-            for (String   line : data) {
-                fileWriter.append(line);
+            for (Object line : data) {
+                fileWriter.append((CharSequence) line);
                 fileWriter.append(NEW_LINE_SEPARATOR);
             }
 

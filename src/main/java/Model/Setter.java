@@ -2,6 +2,7 @@ package Model;
 
 import Pages.ParcingMethods;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import static com.codeborne.selenide.Selenide.page;
@@ -27,8 +28,7 @@ public class Setter {
                 "записаться",
                 "заказа",
                 "nails",
-                "nails",
-                "nails",
+                "nail",
                 "подарок",
                 "косметика",
                 "аксессуар",
@@ -45,17 +45,38 @@ public class Setter {
                 "Shoes",
                 "boutique",
                 "отправка",
-                "лучшее качество"
+                "лучшее качество",
+                "fashion",
+                "podarki",
+                "toys",
+                "byketa",
+                "byket",
+                "makeup",
+                "beauty",
+                "shoez",
+                "studio",
+                "kids",
+                "lazer",
+                "moda",
+                "avtorunok",
+                "detki",
+                "media",
+                "atelier",
+                "Каталог",
+                "Пижамы",
+                "бельё",
+                "возврата нет"
+
+
         };
         return page(ParcingMethods.class);
     }
 
-    public String lineToCSV(Map reportData){
-        String linetoCSV;
-        linetoCSV = reportData.get("Link/ID").toString();
-
-        return  linetoCSV;
-    }
+//    public String lineToCSV(Map reportData){
+//        String linetoCSV;
+//        linetoCSV = reportData.get("Link/ID").toString();
+//        return  linetoCSV;
+//    }
 
 
 }
