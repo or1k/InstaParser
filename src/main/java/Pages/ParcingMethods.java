@@ -8,6 +8,8 @@ import com.codeborne.selenide.WebDriverRunner;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
+
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.*;
@@ -26,11 +28,12 @@ public class ParcingMethods {
     private SelenideElement Followers = $(By.xpath("//*[@class='-nal3 'and contains(@href, 'followers')]/span"));
     private SelenideElement nextAccount = $(By.xpath("//a[@class='HBoOv coreSpriteRightPaginationArrow']"));
     private SelenideElement FirstComment = $(By.xpath("//ul[@class='XQXOT']//li[1]"));
-    private HashSet<String> list = new HashSet<String>();
+    private HashSet<String> list = new HashSet<>();
     private SelenideElement timeInPost = $(By.xpath("//div[@class='k_Q0X NnvRN']//time"));
     private CsvFileWriter csvFileWriter;
     private int order = Integer.parseInt(TestJTabbed.order.getText());
     private Setter setter = new Setter();
+    private String timeforCSV = "";
 
     public void closePopup(){
         if(PopUp.isEnabled()){
@@ -81,12 +84,12 @@ public class ParcingMethods {
         return false;
     }
 
-//    private String getCurrentTime(){
-//        DateFormat dateFormat = new SimpleDateFormat("HH-mm");
-//        Date currentTime = new Date();
-//       // System.out.println(dateFormat.format(currentTime)); //12-08
-//        return dateFormat.format(currentTime);
-//    }
+    private String getCurrentTime(){
+        DateFormat dateFormat = new SimpleDateFormat("HH-mm");
+        Date currentTime = new Date();
+       // System.out.println(dateFormat.format(currentTime)); //12-08
+        return dateFormat.format(currentTime);
+    }
 
 
     private boolean checkStatusAccount(){
@@ -201,7 +204,7 @@ public class ParcingMethods {
         long startTime = System.currentTimeMillis();
         csvFileWriter = new CsvFileWriter();
         FirstPicture.click();
-
+        timeforCSV = getCurrentTime();
         int numberFollowerInList = 1;
         System.out.println(startTime);
         for (int i = 0; i < order;) {
@@ -327,7 +330,7 @@ public class ParcingMethods {
                 nextAccount.click();
                 sleep(500);
             }catch (Exception ex){
-                csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
+                csvFileWriter.writeCsvFile("Instagram_peoples_"+ timeforCSV + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
                 getTimeforTest(startTime);
             }
@@ -335,7 +338,7 @@ public class ParcingMethods {
             numberFollowerInList++;
         }
         getTimeforTest(startTime);
-        csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
+        csvFileWriter.writeCsvFile("Instagram_peoples_"+ timeforCSV + "_" + order +".csv", list, "people");
     }
 
 
@@ -345,6 +348,7 @@ public class ParcingMethods {
         System.out.println("HashTag Start");
         csvFileWriter = new CsvFileWriter();
         FirstPicture.click();
+        timeforCSV = getCurrentTime();
         long startTime = System.currentTimeMillis();
         int numberFollowerInList = 1;
         for (int i = 0; i < order;) {
@@ -494,13 +498,13 @@ public class ParcingMethods {
                 nextAccount.click();
                 sleep(500);
             }catch (Exception ex){
-                csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
+                csvFileWriter.writeCsvFile("Instagram_peoples_"+ timeforCSV + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
                 getTimeforTest(startTime);
             }
             numberFollowerInList++;
         }
-        csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
+        csvFileWriter.writeCsvFile("Instagram_peoples_"+ timeforCSV + "_" + order +".csv", list, "people");
         getTimeforTest(startTime);
     }
 
@@ -510,6 +514,7 @@ public class ParcingMethods {
         csvFileWriter = new CsvFileWriter();
         Followers.click();
         int numberFollowerInList = 1;
+        timeforCSV = getCurrentTime();
         System.out.println(order);
         long startTime = System.currentTimeMillis();
 
@@ -626,13 +631,13 @@ public class ParcingMethods {
                 WebDriverRunner.getWebDriver().navigate().back();
                 sleep(500);
             }catch (Exception ex){
-                csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
+                csvFileWriter.writeCsvFile("Instagram_peoples_"+ timeforCSV + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
                 getTimeforTest(startTime);
             }
             numberFollowerInList++;
         }
-        csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
+        csvFileWriter.writeCsvFile("Instagram_peoples_"+ timeforCSV + "_" + order +".csv", list, "people");
         getTimeforTest(startTime);
     }
 
