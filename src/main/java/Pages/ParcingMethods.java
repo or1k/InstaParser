@@ -493,7 +493,6 @@ public class ParcingMethods {
                 switchTo().window(0);
                 nextAccount.click();
                 sleep(500);
-                i++;
             }catch (Exception ex){
                 csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
@@ -626,7 +625,6 @@ public class ParcingMethods {
 
                 WebDriverRunner.getWebDriver().navigate().back();
                 sleep(500);
-                i++;
             }catch (Exception ex){
                 csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
