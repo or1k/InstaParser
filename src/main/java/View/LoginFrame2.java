@@ -4,8 +4,11 @@ import Test.ParcingFollowers;
 
 import javax.swing.*;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
 
 
 public class LoginFrame2 {
@@ -21,18 +24,19 @@ public class LoginFrame2 {
         frame = new JFrame("Instagram Subscription Bot");
         frame.setSize(400, 190);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         JPanel panel = new JPanel();
+
         frame.add(panel);
         placeComponents(panel);
-
         frame.setVisible(true);
     }
 
 
 
+
     public static void placeComponents(JPanel panel) {
         panel.setLayout(null);
+
 
         JLabel userLabel = new JLabel("User");
         userLabel.setBounds(10, 10, 80, 25);

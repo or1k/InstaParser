@@ -51,6 +51,7 @@ public class Setter {
                 "toys",
                 "byketa",
                 "byket",
+                "buket",
                 "makeup",
                 "beauty",
                 "shoez",
@@ -65,6 +66,12 @@ public class Setter {
                 "Каталог",
                 "Пижамы",
                 "бельё",
+                "shop1",
+                "best",
+                "бельё",
+                "бельё",
+                "бельё",
+
                 "возврата нет"
 
 

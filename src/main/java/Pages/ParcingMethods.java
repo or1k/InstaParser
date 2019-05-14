@@ -4,13 +4,10 @@ import Model.CsvFileWriter;
 import Model.Setter;
 import View.TestJTabbed;
 import com.codeborne.selenide.SelenideElement;
-import com.codeborne.selenide.WebDriverProvider;
 import com.codeborne.selenide.WebDriverRunner;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
-
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.*;
@@ -28,16 +25,12 @@ public class ParcingMethods {
     private SelenideElement Description = $(By.xpath("//div[@class='-vDIg']/span"));
     private SelenideElement Followers = $(By.xpath("//*[@class='-nal3 'and contains(@href, 'followers')]/span"));
     private SelenideElement nextAccount = $(By.xpath("//a[@class='HBoOv coreSpriteRightPaginationArrow']"));
-    //public ArrayList<String> list = new ArrayList<String>();
     private SelenideElement FirstComment = $(By.xpath("//ul[@class='XQXOT']//li[1]"));
-    //private Map reportData = new HashMap();
-    private HashSet list = new HashSet();
+    private HashSet<String> list = new HashSet<String>();
     private SelenideElement timeInPost = $(By.xpath("//div[@class='k_Q0X NnvRN']//time"));
-   // private Setter setter = new Setter();
     private CsvFileWriter csvFileWriter;
     private int order = Integer.parseInt(TestJTabbed.order.getText());
-    private String startTime = "";
-
+    private Setter setter = new Setter();
 
     public void closePopup(){
         if(PopUp.isEnabled()){
@@ -69,7 +62,7 @@ public class ParcingMethods {
 //        return false;
 //    }
 
-    public boolean checkKeyWordsInDescription(){
+    private boolean checkKeyWordsInDescription(){
         Setter setter = new Setter();
         setter.setKeyWords();
         for(int i=0;i<setter.keyWords.length; i++){
@@ -88,12 +81,12 @@ public class ParcingMethods {
         return false;
     }
 
-    private String getCurrentTime(){
-        DateFormat dateFormat = new SimpleDateFormat("HH-mm");
-        Date currentTime = new Date();
-       // System.out.println(dateFormat.format(currentTime)); //12-08
-        return dateFormat.format(currentTime);
-    }
+//    private String getCurrentTime(){
+//        DateFormat dateFormat = new SimpleDateFormat("HH-mm");
+//        Date currentTime = new Date();
+//       // System.out.println(dateFormat.format(currentTime)); //12-08
+//        return dateFormat.format(currentTime);
+//    }
 
 
     private boolean checkStatusAccount(){
@@ -129,7 +122,7 @@ public class ParcingMethods {
         }
     }
 
-    public int checkLastPostDate() throws InterruptedException {
+    private int checkLastPostDate() throws InterruptedException {
 //        Actions newTab = new Actions(WebDriverRunner.getWebDriver());
 //        newTab.keyDown(Keys.CONTROL).click(FirstPicture).keyUp(Keys.CONTROL).build().perform();
             FirstPicture.click();
@@ -161,33 +154,54 @@ public class ParcingMethods {
         return 0;
     }
 
-    private boolean checkKeyWordsFirstPost(){
-        Setter setter = new Setter();
+    //              Метод для просчета времени на тест
+    private void getTimeforTest(long startTime) {
+        long currentTime = System.currentTimeMillis() - startTime;
+        long minutes = (currentTime / 1000) / 60;
+        long seconds = (currentTime / 1000) % 60;
+        System.out.format("Test passed = %d minutes and %d seconds.", minutes, seconds);
+        System.out.println("\n---------------------------------------------------------------------------");
+    }
+
+    private boolean checkKeyWordsFirstPost() {
         setter.setKeyWords();
-        for(int i=0;i<setter.keyWords.length; i++){
-            if(FirstComment.isDisplayed()) {
+        for (int i = 0; i < setter.keyWords.length; i++) {
+            if (FirstComment.isDisplayed()) {
                 if (FirstComment.getText().contains(setter.keyWords[i])) {
                     System.out.println("Рекламный пост. Скипаем.");
                     System.out.println("Есть совпадение по слову " + setter.keyWords[i]);
                     return true;
-                }else{
-                    System.out.println("Пост не рекламный. кек");
-                    return false;
                 }
-            }else{
+            } else {
                 System.out.println("Пост отсутствует.");
                 return false;
             }
         }
+        System.out.println("Пост не рекламный. кек");
         return false;
     }
 
-    public ParcingMethods parceGeo(){
+    private boolean checkURLbyKeyWords() {
+        setter.setKeyWords();
+        String url = WebDriverRunner.getWebDriver().getCurrentUrl();
+        for (int i = 0; i < setter.keyWords.length; i++) {
+            if (url.contains(setter.keyWords[i])) {
+                System.out.println("Аккаунт похож на магазин. Скипаем.");
+                System.out.println("Есть совпадение по слову " + setter.keyWords[i]);
+                return true;
+            }
+        }
+        System.out.println("Аккаунт не магазин. кек");
+        return false;
+    }
+
+    public void parceGeo(){
 
         System.out.println("GEO Start");
+        long startTime = System.currentTimeMillis();
         csvFileWriter = new CsvFileWriter();
         FirstPicture.click();
-        startTime = getCurrentTime();
+
         int numberFollowerInList = 1;
         System.out.println(startTime);
         for (int i = 0; i < order;) {
@@ -196,7 +210,7 @@ public class ParcingMethods {
                 System.out.println("ССылка на пользователя " + WebDriverRunner.getWebDriver().getCurrentUrl());
                 sleep(500);
 
-                /**
+                /*
                  * Проверка на рекламный пост
                  */
                 System.out.println("Проверка на рекламный пост:");
@@ -207,7 +221,7 @@ public class ParcingMethods {
                 }
 
 
-                /**
+                /*
                  * Пытаемся перейти в аккаунт
                  */
                 if(nickButton.isDisplayed()) {
@@ -215,16 +229,16 @@ public class ParcingMethods {
                     newTab.keyDown(Keys.CONTROL).click(nickButton).keyUp(Keys.CONTROL).build().perform();
                 }else{
                     nextAccount.click();
-                    sleep(1000);
+                    sleep(500);
                     numberFollowerInList++;
                     continue;
                 }
 
-                sleep(1000);
+                sleep(500);
                 switchTo().window(1);
 
 
-                /**
+                /*
                  * Закрытый акк или нет
                  */
 
@@ -232,12 +246,25 @@ public class ParcingMethods {
                         WebDriverRunner.getWebDriver().close();
                         switchTo().window(0);
                         nextAccount.click();
-                        sleep(1000);
+                        sleep(500);
                         numberFollowerInList++;
                         continue;
                     }
 
-                /**
+                /*
+                 * Проверка на магазин по URL аккаунта
+                 */
+                System.out.println("Проверка на магаз по URL: ");
+                if(checkURLbyKeyWords()){
+                    WebDriverRunner.getWebDriver().close();
+                    switchTo().window(0);
+                    nextAccount.click();
+                    sleep(500);
+                    numberFollowerInList++;
+                    continue;
+                }
+
+                /*
                  * Проверка на Стоп-слова
                  */
                     System.out.println("Проверка на стоп-слова:");
@@ -245,20 +272,20 @@ public class ParcingMethods {
                         WebDriverRunner.getWebDriver().close();
                         switchTo().window(0);
                         nextAccount.click();
-                        sleep(1000);
+                        sleep(500);
                         numberFollowerInList++;
                         continue;
                     }
 
 
-                /**
+                /*
                  * Проверка подписчиков и подписок
                  */
                     if (!(checkFollowersAndFollowing())) {
                         WebDriverRunner.getWebDriver().close();
                         switchTo().window(0);
                         nextAccount.click();
-                        sleep(1000);
+                        sleep(500);
                         numberFollowerInList++;
                         continue;
                 }
@@ -284,12 +311,12 @@ public class ParcingMethods {
 //                    switchTo().window(0);
 //                }
 
-                /**
+                /*
                  * Добавляемя аккаунт в список
                  */
                 list.add(WebDriverRunner.getWebDriver().getCurrentUrl());
 
-                /**
+                /*
                  * Приравниваем цикл к количеству записей в файле.
                  */
                 if(i != list.size()){
@@ -298,26 +325,27 @@ public class ParcingMethods {
                 WebDriverRunner.getWebDriver().close();
                 switchTo().window(0);
                 nextAccount.click();
-                sleep(1000);
+                sleep(500);
             }catch (Exception ex){
                 csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
+                getTimeforTest(startTime);
             }
 
             numberFollowerInList++;
         }
+        getTimeforTest(startTime);
         csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
-        return this;
     }
 
 
 
 
-    public ParcingMethods parceHashTag(){
+    public void parceHashTag(){
         System.out.println("HashTag Start");
         csvFileWriter = new CsvFileWriter();
         FirstPicture.click();
-        startTime = getCurrentTime();
+        long startTime = System.currentTimeMillis();
         int numberFollowerInList = 1;
         for (int i = 0; i < order;) {
             try {
@@ -325,7 +353,7 @@ public class ParcingMethods {
                 System.out.println("ССылка на пользователя " + WebDriverRunner.getWebDriver().getCurrentUrl());
                 sleep(500);
 
-                /**
+                /*
                  * Проверка на рекламный пост
                  */
                 try {
@@ -349,7 +377,7 @@ public class ParcingMethods {
                 switchTo().window(1);
 
 
-                /**
+                /*
                  * Закрытый акк или нет
                  */
                 try {
@@ -357,7 +385,7 @@ public class ParcingMethods {
                         WebDriverRunner.getWebDriver().close();
                         switchTo().window(0);
                         nextAccount.click();
-                        sleep(1000);
+                        sleep(500);
                         numberFollowerInList++;
                         continue;
                     }
@@ -365,12 +393,28 @@ public class ParcingMethods {
                     WebDriverRunner.getWebDriver().close();
                     switchTo().window(0);
                     nextAccount.click();
-                    sleep(1000);
+                    sleep(500);
                     numberFollowerInList++;
                     continue;
                 }
 
-                /**
+                /*
+                 * Проверка на магазин по URL аккаунта
+                 */
+                System.out.println("Проверка на магаз по URL: ");
+                if(checkURLbyKeyWords()){
+                    WebDriverRunner.getWebDriver().close();
+                    switchTo().window(0);
+                    nextAccount.click();
+                    sleep(500);
+                    numberFollowerInList++;
+                    continue;
+                }
+
+
+
+
+                /*
                  * Проверка на Стоп-слова
                  */
                 try {
@@ -379,7 +423,7 @@ public class ParcingMethods {
                         WebDriverRunner.getWebDriver().close();
                         switchTo().window(0);
                         nextAccount.click();
-                        sleep(1000);
+                        sleep(500);
                         numberFollowerInList++;
                         continue;
                     }
@@ -387,12 +431,12 @@ public class ParcingMethods {
                     WebDriverRunner.getWebDriver().close();
                     switchTo().window(0);
                     nextAccount.click();
-                    sleep(1000);
+                    sleep(500);
                     numberFollowerInList++;
                     continue;
                 }
 
-                /**
+                /*
                  * Проверка подписчиков и подписок
                  */
                 try {
@@ -400,7 +444,7 @@ public class ParcingMethods {
                         WebDriverRunner.getWebDriver().close();
                         switchTo().window(0);
                         nextAccount.click();
-                        sleep(1000);
+                        sleep(500);
                         numberFollowerInList++;
                         continue;
                     }
@@ -408,7 +452,7 @@ public class ParcingMethods {
                     WebDriverRunner.getWebDriver().close();
                     switchTo().window(0);
                     nextAccount.click();
-                    sleep(1000);
+                    sleep(500);
                     numberFollowerInList++;
                     continue;
                 }
@@ -434,11 +478,11 @@ public class ParcingMethods {
 //                    switchTo().window(0);
 //                }
 
-                /**
+                /*
                  * Добавляемя аккаунт в список
                  */
                 list.add(WebDriverRunner.getWebDriver().getCurrentUrl());
-                /**
+                /*
                  * Приравниваем цикл к количеству записей в файле.
                  */
                 if(i != list.size()){
@@ -448,16 +492,17 @@ public class ParcingMethods {
                 WebDriverRunner.getWebDriver().close();
                 switchTo().window(0);
                 nextAccount.click();
-                sleep(1000);
+                sleep(500);
                 i++;
             }catch (Exception ex){
                 csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
+                getTimeforTest(startTime);
             }
             numberFollowerInList++;
         }
         csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
-        return this;
+        getTimeforTest(startTime);
     }
 
 
@@ -467,7 +512,7 @@ public class ParcingMethods {
         Followers.click();
         int numberFollowerInList = 1;
         System.out.println(order);
-        startTime = getCurrentTime();
+        long startTime = System.currentTimeMillis();
 
         for (int i = 0; i < order;) {
             try {
@@ -477,15 +522,15 @@ public class ParcingMethods {
 
                 System.out.println("--------------------------Проверка пользователя номер "+ numberFollowerInList +"--------------------------");
                 loginButton.click();
-                sleep(1000);
+                sleep(500);
                 System.out.println("ССылка на пользователя " + WebDriverRunner.getWebDriver().getCurrentUrl());
 
-                /**
-                 * Закрытый акк или нет
+                /*
+                  Закрытый акк или нет
                  */
                 if(checkStatusAccount()){
                     WebDriverRunner.getWebDriver().navigate().back();
-                    sleep(1000);
+                    sleep(500);
                     numberFollowerInList++;
                     continue;
                 }
@@ -505,40 +550,49 @@ public class ParcingMethods {
 //                System.out.println("ССылка на пользователя " + WebDriverRunner.getWebDriver().getCurrentUrl());
 //                sleep(1000);
 //                switchTo().window(1);
+                /*
+                 * Проверка на магазин по URL аккаунта
+                 */
+                System.out.println("Проверка на магаз по URL: ");
+                if(checkURLbyKeyWords()){
+                    WebDriverRunner.getWebDriver().navigate().back();
+                    sleep(500);
+                    numberFollowerInList++;
+                    continue;
+                }
 
 
 
-
-                /**
+                /*
                  * Проверка на Стоп-слова
                  */
                 System.out.println("Проверка на стоп-слова:");
                 if(checkKeyWordsInDescription()){
                     WebDriverRunner.getWebDriver().navigate().back();
-                    sleep(1000);
+                    sleep(500);
                     numberFollowerInList++;
                     continue;
                 }
 
-                /**
+                /*
                  * Проверка подписчиков и подписок
                  */
                 try {
                     if (!(checkFollowersAndFollowing())) {
                         WebDriverRunner.getWebDriver().navigate().back();
-                        sleep(1000);
+                        sleep(500);
                         numberFollowerInList++;
                         continue;
                     }
                 }catch (Exception ex){
                     WebDriverRunner.getWebDriver().navigate().back();
-                    sleep(1000);
+                    sleep(500);
                     numberFollowerInList++;
                     continue;
                 }
 
 
-                /**
+                /*
                  * Проверка на дату последнего поста
                  */
                 if(FirstPicture.isDisplayed()) {
@@ -556,14 +610,14 @@ public class ParcingMethods {
                 }else{
                     System.out.println("Постов нет.");
                     WebDriverRunner.getWebDriver().navigate().back();
-                    sleep(1000);
+                    sleep(500);
                     numberFollowerInList++;
                     continue;
                 }
 
                 list.add(WebDriverRunner.getWebDriver().getCurrentUrl());
 
-                /**
+                /*
                  * Приравниваем цикл к количеству записей в файле.
                  */
                 if(i != list.size()){
@@ -571,15 +625,17 @@ public class ParcingMethods {
                 }
 
                 WebDriverRunner.getWebDriver().navigate().back();
-                sleep(1000);
+                sleep(500);
                 i++;
             }catch (Exception ex){
                 csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
                 System.out.println(ex.getMessage());
+                getTimeforTest(startTime);
             }
             numberFollowerInList++;
         }
         csvFileWriter.writeCsvFile("Instagram_peoples_"+ startTime + "_" + order +".csv", list, "people");
+        getTimeforTest(startTime);
     }
 
 
