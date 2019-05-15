@@ -1,6 +1,5 @@
 package Pages;
 
-import View.LoginFrame2;
 import View.TestJTabbed;
 import com.codeborne.selenide.Condition;
 import org.openqa.selenium.By;

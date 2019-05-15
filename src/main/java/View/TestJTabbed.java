@@ -5,15 +5,19 @@ import Test.ParcingFollowers;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 
 public class TestJTabbed {
-    public static JTextField linkText = new JTextField(20);
-    public static JTextField userText = new JTextField(20);
-    public static JTextField order = new JTextField(20);
-    public static JTextField countSubscribers = new JTextField(20);
-    public static JPasswordField passwordText = new JPasswordField(20);
+    public static JTextField linkText;
+    public static JTextField userText;
+    public static JTextField order;
+    public static JTextField countSubscribers;
+    public static JPasswordField passwordText;
     public static JButton loginButton = new JButton("login");
     public static JButton exitButton = new JButton("exit");
+    public static String filePath;
+    public static JTextField path; //Assume this is the text box you placed beside browse button
+    public static JButton btnBrowse = new JButton("Save folder");
 
 
     public static JFrame frame;
@@ -25,7 +29,7 @@ public class TestJTabbed {
 
     public static void main(String[] args) {
         frame = new JFrame("InstaParser");
-        frame.setPreferredSize(new Dimension(400,260));
+        frame.setPreferredSize(new Dimension(400,330));
         // handle window close
 
         frame.addWindowListener(new WindowAdapter() {
@@ -44,6 +48,7 @@ public class TestJTabbed {
         // display
         frame.getContentPane().add(panel1);
         frame.pack();
+        frame.setResizable(false);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
@@ -111,22 +116,49 @@ public class TestJTabbed {
         panel.add(jRadioButton3);
 
 
-        loginButton.setBounds(10, 190, 80, 25);
+        btnBrowse.setBounds(140, 190, 100, 25);
+        panel.add(btnBrowse);
+        btnBrowse.addActionListener(new TestJTabbed.ActionListenerSaveReport());
+
+        path = new JTextField(20);
+        path.setBounds(10, 220, 350, 25);
+        path.setEditable(false);
+        path.setToolTipText("Нужна ссылка откуда пиздить подписоту!!");
+        panel.add(path);
+
+        loginButton.setBounds(10, 250, 80, 25);
         panel.add(loginButton);
         loginButton.addActionListener(new TestJTabbed.ActionListenerForGeo());
 
-        exitButton.setBounds(280, 190, 80, 25);
+        exitButton.setBounds(280, 250, 80, 25);
         panel.add(exitButton);
         exitButton.addActionListener(new TestJTabbed.ExitActionListener());
-
 
     }
 
 //
 
+    public static class ActionListenerSaveReport extends Component implements ActionListener{
+        public void actionPerformed(ActionEvent e)
+        {
+            if (e.getSource() == btnBrowse)
+            {
+               final JFileChooser chooser = new JFileChooser(new File("C:\\")); //Downloads Directory as default
+                chooser.setDialogTitle("Select Location");
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                chooser.setAcceptAllFileFilterUsed(true);
+
+                if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
+                {
+                    filePath = chooser.getSelectedFile().getPath();
+                    path.setText(filePath);
+                }
+            }
+        }
+    }
+
     public static class ActionListenerForGeo implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            String qual = " ";
             loginButton = (JButton)e.getSource();
             frame.dispose();
             ParcingFollowers parcingFollowers = new ParcingFollowers();

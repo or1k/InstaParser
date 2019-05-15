@@ -1,5 +1,8 @@
 package Model;
 
+import View.TestJTabbed;
+import org.testng.annotations.Test;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
@@ -16,10 +19,13 @@ public class CsvFileWriter {
     public void writeCsvFile(String fileName, HashSet data, String nameFlow) {
 
         FileWriter fileWriter = null;
-
+        int lastSymbol = TestJTabbed.filePath.length()-1;
         try {
-            fileWriter = new FileWriter(System.getProperty("user.dir") +"\\src\\main\\resources\\" + fileName);
-
+            if(String.valueOf(TestJTabbed.filePath.charAt(lastSymbol)).equals("\\")) {
+                fileWriter = new FileWriter(TestJTabbed.filePath + fileName);
+            }else{
+                fileWriter = new FileWriter(TestJTabbed.filePath + "\\" + fileName);
+            }
             if(nameFlow.contains("people")) {
                 //Write the CSV file header
                 fileWriter.append(FILE_HEADER);
