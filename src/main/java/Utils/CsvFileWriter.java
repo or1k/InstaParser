@@ -1,4 +1,4 @@
-package Model;
+package Utils;
 
 import View.TestJTabbed;
 import org.testng.annotations.Test;

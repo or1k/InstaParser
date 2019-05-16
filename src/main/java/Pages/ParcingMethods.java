@@ -1,6 +1,6 @@
 package Pages;
 
-import Model.CsvFileWriter;
+import Utils.CsvFileWriter;
 import Model.Setter;
 import View.TestJTabbed;
 import com.codeborne.selenide.SelenideElement;
