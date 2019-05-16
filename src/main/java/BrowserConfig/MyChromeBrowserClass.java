@@ -23,10 +23,10 @@ public class MyChromeBrowserClass implements WebDriverProvider {
         return new ChromeDriver(capabilities);
     }
 
-    public static ChromeOptions getChromeOptions() {
+    private static ChromeOptions getChromeOptions() {
         ChromeOptions chromeOptions = new ChromeOptions();
 //        chromeOptions.addArguments("user-data-dir=./src/test/profiles/chrome/testProfile/");
-          chromeOptions.addExtensions(new File(System.getProperty("user.dir") + "\\src\\main\\resources\\gighmmpiobklfepjocnamgkkbiglidom"));
+//        chromeOptions.addExtensions(new File(System.getProperty("user.dir") + "\\src\\main\\resources\\adblock"));
 //        chromeOptions.addArguments("--start-maximized");
 //        chromeOptions.addArguments("--disable-gpu");
 //        chromeOptions.addArguments("--disable-extensions");
