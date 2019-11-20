@@ -26,7 +26,7 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>${project.build.outputDirectory}/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
                     <argLine>-Dfile.encoding=UTF-8</argLine>
                 </configuration>
             </plugin>
